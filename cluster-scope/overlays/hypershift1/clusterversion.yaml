@@ -3,5 +3,5 @@ kind: ClusterVersion
 metadata:
   name: version
 spec:
-  channel: stable-4.15
-  clusterID: 2246c137-f5bf-45fb-b4f6-ccee7949273f
+  channel: fast-4.16
+  clusterID: 3589e292-680d-4c9e-914b-06f878dc7ed2
