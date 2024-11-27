@@ -6,9 +6,6 @@ commonLabels:
 resources:
 - ../common
 
-- ../../bundles/external-secrets-clustersecretstore
-- ../../bundles/metallb
-- ../../bundles/nerc-certificate-clusterissuers
 - certificates
 - console
 - clusterrolebindings
@@ -16,6 +13,10 @@ resources:
 - nodenetworkconfigurationpolicies
 - feature/odf
 - externalsecrets
+- ../../bundles/external-secrets-clustersecretstore
+- ../../bundles/metallb
+- ../../bundles/nerc-certificate-clusterissuers
+- ../../bundles/virt
 
 components:
   - ../../components/nerc-oauth-github
