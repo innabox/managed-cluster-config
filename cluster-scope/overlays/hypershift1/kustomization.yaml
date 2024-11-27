@@ -17,6 +17,7 @@ resources:
 - ../../bundles/metallb
 - ../../bundles/nerc-certificate-clusterissuers
 - ../../bundles/virt
+- ../../bundles/acm
 
 components:
   - ../../components/nerc-oauth-github
@@ -87,3 +88,11 @@ patches:
     - op: replace
       path: /spec/channel
       value: stable-4.17
+- target:
+    kind: Subscription
+    name: acm
+    namespace: open-cluster-management
+  patch: |
+    - op: replace
+      path: /spec/channel
+      value: release-2.12
