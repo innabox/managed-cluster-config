@@ -22,6 +22,14 @@ resources:
 components:
   - ../../components/nerc-oauth-github
 
+configMapGenerator:
+- name: cluster-monitoring-config
+  namespace: openshift-monitoring
+  options:
+    disableNameSuffixHash: true
+  files:
+  - config.yaml=configmaps/cluster-monitoring-config.yaml
+
 patches:
 - target:
     kind: ClusterIssuer
