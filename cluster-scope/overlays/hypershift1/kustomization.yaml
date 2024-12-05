@@ -17,7 +17,7 @@ resources:
 - ../../bundles/metallb
 - ../../bundles/nerc-certificate-clusterissuers
 - ../../bundles/virt
-- ../../bundles/acm
+- ../../bundles/acm-cim
 
 components:
   - ../../components/nerc-oauth-github
