@@ -13,6 +13,8 @@ resources:
 - nodenetworkconfigurationpolicies
 - feature/odf
 - externalsecrets
+- dns
+
 - ../../bundles/external-secrets-clustersecretstore
 - ../../bundles/metallb
 - ../../bundles/nerc-certificate-clusterissuers

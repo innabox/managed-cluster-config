@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: custom-dns
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: coredns-openshift
+          image: quay.io/openshift/origin-coredns:4.17
+          command:
+            - /usr/bin/coredns
+          args:
+            - -dns.port
+            - '8053'
+            - -conf
+            - /etc/coredns/Corefile
+          volumeMounts:
+            - mountPath: /etc/coredns
+              name: dns-config
+          ports:
+            - name: domain-tcp
+              protocol: TCP
+              containerPort: 8053
+            - name: domain-udp
+              protocol: UDP
+              containerPort: 8053
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: dns-config
+          name: dns-config
