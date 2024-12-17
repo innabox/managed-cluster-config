@@ -106,3 +106,14 @@ patches:
     - op: replace
       path: /spec/channel
       value: release-2.12
+
+# per: https://docs.openshift.com/container-platform/4.17/hosted_control_planes/hcp-deploy/hcp-deploy-virt.html
+- target:
+    kind: IngressController
+    name: default
+    namespace: openshift-ingress-operator
+  patch: |
+    - op: add
+      path: /spec/routeAdmission
+      value:
+        wildcardPolicy: WildcardsAllowed
