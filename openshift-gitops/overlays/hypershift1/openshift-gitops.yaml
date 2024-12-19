@@ -1,0 +1,11 @@
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  extraConfig:
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    url: "https://gitops.apps.hypershift1.nerc.mghpcc.org"
+  server:
+    host: gitops.apps.hypershift1.nerc.mghpcc.org

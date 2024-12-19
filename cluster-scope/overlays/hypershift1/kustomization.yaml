@@ -21,6 +21,7 @@ resources:
 - ../../bundles/nerc-certificate-clusterissuers
 - ../../bundles/virt
 - ../../bundles/acm-cim
+- ../../bundles/openshift-gitops
 
 components:
   - ../../components/nerc-oauth-github
@@ -107,6 +108,13 @@ patches:
     - op: replace
       path: /spec/channel
       value: release-2.12
+- target:
+    kind: Subscription
+    name: openshift-gitops-operator
+  patch: |
+    - op: replace
+      path: /spec/channel
+      value: gitops-1.15
 
 # per: https://docs.openshift.com/container-platform/4.17/hosted_control_planes/hcp-deploy/hcp-deploy-virt.html
 - target:
