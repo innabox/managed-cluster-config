@@ -43,16 +43,28 @@ patches:
       path: /spec/acme/solvers/0/selector/dnsZones/0
       value: hypershift1.nerc.mghpcc.org
 - path: clustersecretstores/nerc-cluster-secrets_patch.yaml
-- patch: |
-    apiVersion: config.openshift.io/v1
+- target:
     kind: OAuth
-    metadata:
-      name: cluster
-    spec:
-      identityProviders:
-      - name: github
+    name: cluster
+  patch: |
+    - op: replace
+      path: /spec/identityProviders/0/name
+      value: ocp-on-nerc
+    - op: replace
+      path: /spec/identityProviders/0/github/clientID
+      value: 1a8790fb1d1c5f46c510
+    - op: add
+      path: /spec/identityProviders/-
+      value:
+        name: innabox
+        type: GitHub
+        mappingMethod: claim
         github:
-          clientID: 1a8790fb1d1c5f46c510
+          clientID: Ov23liC8gchXAkOQXKOk
+          clientSecret:
+            name: innabox-client-secret
+          teams:
+          - innabox/fulfillment-wg
 - target:
     kind: ExternalSecret
     name: github-client-secret
@@ -126,3 +138,14 @@ patches:
       path: /spec/routeAdmission
       value:
         wildcardPolicy: WildcardsAllowed
+
+- target:
+    kind: ClusterRoleBinding
+    name: nerc-ops
+  patch: |
+    - op: add
+      path: /subjects/-
+      value:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: fulfillment-wg
