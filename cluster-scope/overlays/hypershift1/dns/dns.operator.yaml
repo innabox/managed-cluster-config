@@ -21,4 +21,4 @@ spec:
     forwardPlugin:
       policy: Random
       upstreams:
-      - custom-dns.custom-dns.svc.cluster.local:8053
+      - 172.30.144.180:8053
