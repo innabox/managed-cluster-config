@@ -1,0 +1,15 @@
+apiVersion: aap.ansible.com/v1alpha1
+kind: AnsibleAutomationPlatform
+metadata:
+  name: fulfillment
+  namespace: fulfillment-aap
+spec:
+  image_pull_policy: IfNotPresent
+  controller:
+    disabled: false
+  eda:
+    disabled: false
+  hub:
+    disabled: true
+  lightspeed:
+    disabled: true
