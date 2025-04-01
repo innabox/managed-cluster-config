@@ -2,6 +2,8 @@ apiVersion: config.openshift.io/v1
 kind: Ingress
 metadata:
   name: cluster
+  annotations:
+    ingress.operator.openshift.io/default-enable-http2: "true"
 spec:
   domain: apps.hypershift1.nerc.mghpcc.org
   loadBalancer:
