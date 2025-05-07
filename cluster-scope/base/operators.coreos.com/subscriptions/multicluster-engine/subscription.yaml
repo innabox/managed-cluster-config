@@ -8,4 +8,3 @@ spec:
     name: multicluster-engine
     source: redhat-operators
     sourceNamespace: openshift-marketplace
-
