@@ -8,6 +8,8 @@ spec:
     - acm
     - mce
     - logging-view-plugin
+    - networking-console-plugin
+    - monitoring-plugin
   customization:
     customLogoFile:
       name: nerc-logo
