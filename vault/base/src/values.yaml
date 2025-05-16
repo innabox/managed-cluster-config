@@ -1,0 +1,21 @@
+global:
+  openshift: true
+
+injector:
+  enabled: false
+
+ui:
+  enabled: true
+  activeVaultPodOnly: true
+
+server:
+  route:
+    enabled: true
+    tls:
+      termination: edge
+    host: vault.apps.hypershift1.nerc.mghpcc.org
+  ha:
+    enabled: true
+    raft:
+      enabled: true
+      setNodeId: true

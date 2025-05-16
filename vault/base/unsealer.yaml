@@ -1,0 +1,31 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unsealer
+  labels:
+    component: unsealer
+spec:
+  selector:
+    matchLabels:
+      component: unsealer
+  template:
+    metadata:
+      labels:
+        component: unsealer
+    spec:
+      containers:
+      - name: vault-unseal
+        image: ghcr.io/lrstanley/vault-unseal:master
+        command:
+        - vault-unseal
+        - -c
+        - /config/vault-unseal.yaml
+        volumeMounts:
+        - name: vault-unseal-config
+          mountPath: /config
+      volumes:
+        - name: vault-unseal-config
+          secret:
+            secretName: vault-unseal-config
+            defaultMode: 0400
