@@ -1,0 +1,197 @@
+apiVersion: "vault.banzaicloud.com/v1alpha1"
+kind: "Vault"
+metadata:
+  name: "vault"
+spec:
+  size: 3
+  image: docker.io/hashicorp/vault:1.19.3
+  bankVaultsImage: ghcr.io/bank-vaults/bank-vaults:latest-softhsm
+  serviceAccount: vault
+
+  serviceRegistrationEnabled: true
+
+  existingTlsSecretName: vault-certificate
+
+  ingress:
+    annotations:
+      # Vault is configured as an ssl service, so we need "reencrypt" rather than "edge"
+      # (the latter which expects a plain http service)
+      route.openshift.io/termination: "reencrypt"
+
+      # For "reencrypt" to work, the ingress router needs to trust the
+      # certificate presented by the vault service
+      route.openshift.io/destination-ca-certificate-secret: "server-ca-certificate"
+    spec:
+      rules:
+        - host: vault.apps.hypershift1.nerc.mghpcc.org
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: vault
+                  port:
+                    name: api-port
+
+  # Use local disk to store Vault raft data, see config section.
+  volumeClaimTemplates:
+    - metadata:
+        name: vault-raft
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        volumeMode: Filesystem
+        resources:
+          requests:
+            storage: 5Gi
+
+  volumeMounts:
+    - name: vault-raft
+      mountPath: /vault/file
+
+  # This is how we inject the oidc client secret for dex
+  # into the vault configuration. This stanza exposes it
+  # as an environment variable in all pods generated
+  # by the operator, and then we use an `env` lookup in the
+  # vault configuration template to retrieve it.
+  envsConfig:
+    - name: DEX_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: dex-client-secret
+          key: DEX_CLIENT_SECRET
+
+  # This configures the vault operator to store the
+  # unseal secrets in a Kubernetes secret in the
+  # vault namespace.
+  unsealConfig:
+    kubernetes:
+      secretNamespace: vault
+
+  # This cause the vault pods to skip some setup steps
+  # that fail on OpenShift.
+  vaultEnvsConfig:
+    - name: SKIP_CHOWN
+      value: "1"
+    - name: SKIP_SETCAP
+      value: "1"
+
+  resources:
+    vault:
+      limits:
+        memory: "512Mi"
+        cpu: "200m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+
+  config:
+    storage:
+      raft:
+        path: /vault/file
+    listener:
+      tcp:
+        address: "0.0.0.0:8200"
+        tls_cert_file: /vault/tls/server.crt
+        tls_key_file: /vault/tls/server.key
+    api_addr: https://vault:8200
+    cluster_addr: "https://${.Env.POD_NAME}:8201"
+    ui: true
+    disable_mlock: true
+
+  externalConfig:
+    policies:
+      - name: vault-backup
+        rules: |
+          path "sys/storage/raft/snapshot" {
+            capabilities = ["read"]
+          }
+      - name: innabox-writer
+        rules: |
+          path "innabox/*" {
+          capabilities = ["read", "list", "create", "delete", "update"]
+          }
+      - name: innabox-reader
+        rules: |
+          path "innabox/*" {
+          capabilities = ["read", "list"]
+          }
+    auth:
+
+    # This authenticator permits service-account-token based login
+    # and grants the ability to take raft snapshots.
+    - type: jwt
+      path: jwt/vault-backup
+      config:
+        oidc_discovery_url: https://kubernetes.default.svc
+        oidc_discovery_ca_pem: "${ file `/run/secrets/kubernetes.io/serviceaccount/ca.crt`}"
+      roles:
+      - name: vault-backup
+        role_type: "jwt"
+        bound_audiences: "https://kubernetes.default.svc"
+        bound_subject: "system:serviceaccount:vault:vault-backup"
+        user_claim: "sub"
+        policies: "vault-backup"
+        ttl: "1h"
+
+    # This authenticator permits service-account-token based login
+    # and grants access to the "innabox-reader" role, which permits
+    # reading all secrets in the "innabox" secret store.
+    #
+    # Add fully qualified service accounts to the `bound_claims.sub` field.
+    - type: jwt
+      path: jwt/innabox-reader
+      config:
+        oidc_discovery_url: https://kubernetes.default.svc
+        oidc_discovery_ca_pem: "${ file `/run/secrets/kubernetes.io/serviceaccount/ca.crt`}"
+      roles:
+      - name: innabox-reader
+        role_type: "jwt"
+        bound_audiences: "https://kubernetes.default.svc"
+        bound_claims_type: glob
+        bound_claims:
+          sub: [
+              "system:serviceaccount:external-secrets-operator:vault-secret-reader"
+              ]
+        user_claim: "sub"
+        policies: "innabox-reader"
+        ttl: "1h"
+
+    # This authenticator enables logins to the UI using your openshift username/password.
+    # Permissions are mapped according to your group membership (see the following
+    # "groups" section).
+    - type: oidc
+      config:
+        default_role: openshift-user
+        oidc_client_id: vault
+        oidc_client_secret: "${ env `DEX_CLIENT_SECRET` }"
+        oidc_discovery_url: https://dex.apps.hypershift1.nerc.mghpcc.org
+      roles:
+      - name: openshift-user
+        allowed_redirect_uris:
+        - https://vault.apps.hypershift1.nerc.mghpcc.org/ui/vault/auth/oidc/oidc/callback
+        groups_claim: groups
+        oidc_scopes:
+        - openid
+        - email
+        - groups
+        - profile
+        policies: default
+        user_claim: name
+    groups:
+    - name: fulfillment-wg
+      policies:
+      - innabox-writer
+      type: external
+    group-aliases:
+    - group: fulfillment-wg
+      mountpath: oidc
+      name: fulfillment-wg
+
+    secrets:
+      - path: innabox
+        type: kv
+        description: General secrets.
+        options:
+          version: 2

@@ -1,0 +1,33 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vault
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resources:
+      - securitycontextconstraints
+    resourceNames:
+      - vault
+    verbs:
+      - use
+  - apiGroups:
+      - ''
+    resources:
+      - secrets
+    verbs:
+      - create
+      - update
+      - patch
+      - delete
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+    verbs:
+      - get
+      - update
+      - patch

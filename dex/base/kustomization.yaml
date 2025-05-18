@@ -1,14 +1,97 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: dex
+
 resources:
-- deployments
-- externalsecrets
-- routes
-- secrets
-- serviceaccounts
-- services
-commonLabels:
-  app.kubernetes.io/name: dex
-  app.kubernetes.io/component: dex-server
-  app.kubernetes.io/part-of: auth
+- dex.yaml
+- dex-data.yaml
+- dex-token.yaml
+- dex-certificate.yaml
+
+components:
+- ../../components/localca
+
+secretGenerator:
+  - name: dex-config
+    options:
+      disableNameSuffixHash: true
+    files:
+    - config.yaml=files/dex-config.yaml
+
+patches:
+
+# Configure the Dex service account with an oauth redirect uri. This
+# is a necessary step if you plan to configure an openshift connector that
+# uses a service account as an oauth client.
+# 
+# [1]: https://dexidp.io/docs/connectors/openshift/
+- target:
+    kind: ServiceAccount
+    name: dex
+  patch: |
+    - op: add
+      path: /metadata/annotations/serviceaccounts.openshift.io~1oauth-redirecturi.dex
+      value: https://dex.apps.hypershift1.nerc.mghpcc.org/callback
+
+# Configure the ingress to use the Dex service https port instead of http. It
+# also adds the necessary openshift route annotations such that the
+# generated route will (a) use the "reencrypt" termination strategy and (b)
+# trust the certificate presented by Dex.
+- target:
+    kind: Ingress
+    name: dex
+  patch: |
+    - op: add
+      path: /metadata/annotations/route.openshift.io~1termination
+      value: reencrypt
+    - op: add
+      path: /metadata/annotations/route.openshift.io~1destination-ca-certificate-secret
+      value: server-ca-certificate
+    - op: replace
+      path: /spec/rules/0/http/paths/0/backend/service/port
+      value:
+        name: https
+
+# Beacuse we're use a RWO volume, we need to use the "Recreate" strategy;
+# otherwise, when the Deployment updates, it cannot bring up a new pod
+# (because the PVC is bound to the old pod).
+- target:
+    kind: Deployment
+    name: dex
+  patch: |
+    - op: add
+      path: /spec/strategy
+      value:
+        type: Recreate
+
+# Expose certificates and client secrets to the Dex pod and mount
+# persistent data volume on /data.
+- patch: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: dex
+      namespace: dex
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: dex-certificate
+            secret:
+              secretName: dex-certificate
+          - name: dex-data
+            persistentVolumeClaim:
+              claimName: dex-data
+          containers:
+          - name: dex
+            env:
+            - name: OPENSHIFT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dex-token
+                  key: token
+            volumeMounts:
+            - name: dex-certificate
+              mountPath: /certs
+            - name: dex-data
+              mountPath: /data

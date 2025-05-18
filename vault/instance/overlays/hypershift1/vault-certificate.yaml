@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-certificate
+spec:
+  issuerRef:
+    name: server-ca
+  secretName: vault-certificate
+  dnsNames:
+  - vault
+  - vault.vault
+  - vault.vault.svc
+  ipAddresses:
+  - 127.0.0.1

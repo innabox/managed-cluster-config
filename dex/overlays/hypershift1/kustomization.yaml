@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dex
+resources:
+- ../../base
+
+secretGenerator:
+  - name: dex-config
+    behavior: replace
+    options:
+      disableNameSuffixHash: true
+    files:
+    - config.yaml=files/dex-config.yaml
+
+patches:
+- target:
+    kind: Ingress
+    name: dex
+  patch: |
+    - op: replace
+      path: /spec/rules/0/host
+      value: dex.apps.hypershift1.nerc.mghpcc.org
+
+- patch: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: dex
+      namespace: dex
+    spec:
+      template:
+        spec:
+          containers:
+          - name: dex
+            env:
+            - name: VAULT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dex-client-secrets
+                  key: vault

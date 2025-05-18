@@ -1,0 +1,9 @@
+https:
+  enabled: true
+
+configSecret:
+  name: dex-config
+  create: false
+
+ingress:
+  enabled: true
