@@ -17,8 +17,8 @@ resources:
 - metallb-config
 - fulfillment-aap
 - acm-observability
+- clustersecretstore
 
-- ../../bundles/external-secrets-clustersecretstore
 - ../../bundles/metallb
 - ../../bundles/nerc-certificate-clusterissuers
 - ../../bundles/virt
@@ -45,7 +45,6 @@ patches:
     - op: replace
       path: /spec/acme/solvers/0/selector/dnsZones/0
       value: hypershift1.nerc.mghpcc.org
-- path: clustersecretstores/nerc-cluster-secrets_patch.yaml
 - target:
     kind: OAuth
     name: cluster
@@ -70,33 +69,12 @@ patches:
           - innabox/fulfillment-wg
 - target:
     kind: ExternalSecret
-    name: github-client-secret
-  patch: |
-    - op: replace
-      path: /spec/data/0/remoteRef/key
-      value: nerc/hypershift1/openshift-config/github-client-secret
-- target:
-    kind: ExternalSecret
-    name: aws-route53-credentials
-  patch: |
-    - op: replace
-      path: /spec/dataFrom/0/extract/key
-      value: nerc/hypershift1/aws-route53-credentials
-- target:
-    kind: APIServer
-    name: cluster
-  patch: |
-    - op: replace
-      path: /spec/servingCerts/namedCertificates/0/names/0
-      value: api.hypershift1.nerc.mghpcc.org
-- target:
-    kind: ExternalSecret
   patch: |
     - op: replace
       path: /spec/secretStoreRef
       value:
         kind: ClusterSecretStore
-        name: nerc-cluster-secrets
+        name: cluster-secrets
 - target:
     kind: ExternalSecret
     name: aws-route53-credentials
@@ -106,7 +84,31 @@ patches:
       value: openshift-operators
     - op: replace
       path: /spec/dataFrom/0/extract/key
-      value: nerc/hypershift1/openshift-operators/aws-route53-credentials
+      value: innabox/hypershift1/openshift-operators/aws-route53-credentials
+- target:
+    kind: ExternalSecret
+    name: github-client-secret
+  patch: |
+    - op: replace
+      path: /spec/data/0/remoteRef/key
+      value: innabox/hypershift1/openshift-config/github-client-secret
+- target:
+    kind: ExternalSecret
+    name: github-group-sync
+  patch: |
+    - op: replace
+      path: /spec/data/0/remoteRef/key
+      value: innabox/hypershift1/group-sync-operator/github-group-sync-token
+    - op: replace
+      path: /spec/data/1/remoteRef/key
+      value: innabox/hypershift1/group-sync-operator/github-group-sync-token
+- target:
+    kind: APIServer
+    name: cluster
+  patch: |
+    - op: replace
+      path: /spec/servingCerts/namedCertificates/0/names/0
+      value: api.hypershift1.nerc.mghpcc.org
 - target:
     kind: Subscription
     name: odf-operator

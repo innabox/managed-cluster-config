@@ -12,5 +12,5 @@ spec:
   data:
   - secretKey: external_cluster_details
     remoteRef:
-      key: nerc/hypershift1/openshift-storage/rook-ceph-external-cluster-details
+      key: innabox/hypershift1/openshift-storage/rook-ceph-external-cluster-details
       property: external_cluster_details
