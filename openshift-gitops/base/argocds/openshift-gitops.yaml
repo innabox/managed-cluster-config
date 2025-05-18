@@ -1,16 +1,11 @@
-apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1beta1
 kind: ArgoCD
 metadata:
   name: openshift-gitops
   namespace: openshift-gitops
 spec:
-  resourceCustomizations: |
-    Service:
-      health.lua: |
-        hs = {}
-        hs.status = "Healthy"
-        return hs
-
+  extraConfig:
+    application.resourceTrackingMethod: annotation
   applicationSet:
     resources:
       limits:
@@ -19,14 +14,19 @@ spec:
       requests:
         cpu: 250m
         memory: 512Mi
+    webhookServer:
+      ingress:
+        enabled: false
+      route:
+        enabled: false
   controller:
     resources:
       limits:
         cpu: "2"
-        memory: 10Gi
+        memory: 2Gi
       requests:
         cpu: 250m
-        memory: 5Gi
+        memory: 1Gi
   grafana:
     enabled: false
     ingress:
@@ -49,6 +49,8 @@ spec:
       requests:
         cpu: 250m
         memory: 128Mi
+  monitoring:
+    enabled: false
   notifications:
     enabled: false
   prometheus:
@@ -58,26 +60,28 @@ spec:
     route:
       enabled: false
   rbac:
+    defaultPolicy: ""
     policy: |
       g, system:cluster-admins, role:admin
       g, cluster-admins, role:admin
+      g, fulfillment-wg, role:admin
     scopes: '[groups]'
   redis:
     resources:
       limits:
-        cpu: 500m
-        memory: 256Mi
+        cpu: 1000m
+        memory: 512Mi
       requests:
-        cpu: 250m
-        memory: 128Mi
+        cpu: 512m
+        memory: 256Mi
   repo:
     resources:
       limits:
         cpu: "1"
-        memory: 1Gi
+        memory: 2Gi
       requests:
-        cpu: 250m
-        memory: 256Mi
+        cpu: 512m
+        memory: 1Gi
   resourceExclusions: |
     - apiGroups:
       - tekton.dev
@@ -96,17 +100,16 @@ spec:
       enabled: false
     resources:
       limits:
-        cpu: 1000m
-        memory: 1Gi
-      requests:
         cpu: 500m
-        memory: 512Mi
+        memory: 256Mi
+      requests:
+        cpu: 125m
+        memory: 128Mi
     route:
       enabled: true
     service:
       type: ""
   sso:
-    provider: dex
     dex:
       openShiftOAuth: true
       resources:
@@ -116,3 +119,4 @@ spec:
         requests:
           cpu: 250m
           memory: 128Mi
+    provider: dex
