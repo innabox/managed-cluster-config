@@ -1,15 +1,45 @@
-enableUserWorkload: true
-prometheusK8s:
-  volumeClaimTemplate:
-    spec:
-      storageClassName: ocs-external-storagecluster-ceph-rbd
-      resources:
-        requests:
-          storage: 100Gi
 alertmanagerMain:
   volumeClaimTemplate:
+    metadata: {}
     spec:
-      storageClassName: ocs-external-storagecluster-ceph-rbd
       resources:
         requests:
           storage: 20Gi
+      storageClassName: ocs-external-storagecluster-ceph-rbd
+    status: {}
+enableUserWorkload: true
+nodeExporter:
+  collectors:
+    buddyinfo: {}
+    cpufreq: {}
+    ksmd: {}
+    mountstats: {}
+    netclass: {}
+    netdev: {}
+    processes: {}
+    systemd: {}
+    tcpstat: {}
+prometheusK8s:
+  additionalAlertmanagerConfigs:
+  - apiVersion: v2
+    bearerToken:
+      key: token
+      name: observability-alertmanager-accessor
+    scheme: https
+    staticConfigs:
+    - alertmanager-open-cluster-management-observability.apps.hypershift1.nerc.mghpcc.org
+    tlsConfig:
+      ca:
+        key: service-ca.crt
+        name: hub-alertmanager-router-ca
+      insecureSkipVerify: false
+  externalLabels:
+    managed_cluster: 662fda3d-8cab-48d2-808d-3761d8278594
+  volumeClaimTemplate:
+    metadata: {}
+    spec:
+      resources:
+        requests:
+          storage: 100Gi
+      storageClassName: ocs-external-storagecluster-ceph-rbd
+    status: {}
