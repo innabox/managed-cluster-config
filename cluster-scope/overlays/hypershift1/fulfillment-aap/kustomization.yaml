@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
 - namespace.yaml
 - ansibleautomationplatform.yaml
+- serviceaccount-template-publisher.yaml
