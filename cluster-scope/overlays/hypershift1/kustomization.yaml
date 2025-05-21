@@ -15,7 +15,6 @@ resources:
 - externalsecrets
 - dns
 - metallb-config
-- fulfillment-aap
 - acm-observability
 - clustersecretstore
 

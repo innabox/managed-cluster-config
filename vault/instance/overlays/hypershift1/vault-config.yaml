@@ -152,8 +152,8 @@ spec:
         bound_claims_type: glob
         bound_claims:
           sub: [
-              "system:serviceaccount:external-secrets-operator:vault-secret-reader"
-              ]
+            "system:serviceaccount:external-secrets-operator:vault-secret-reader"
+          ]
         user_claim: "sub"
         policies: "innabox-reader"
         ttl: "1h"

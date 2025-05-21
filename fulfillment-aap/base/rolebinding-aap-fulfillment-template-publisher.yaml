@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aap-fulfillment-template-publisher-binding
+  namespace: innabox
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: create-controller-token
+subjects:
+  - kind: ServiceAccount
+    name: template-publisher
+    namespace: fulfillment-aap

@@ -23,7 +23,7 @@ patches:
 # Configure the Dex service account with an oauth redirect uri. This
 # is a necessary step if you plan to configure an openshift connector that
 # uses a service account as an oauth client.
-# 
+#
 # [1]: https://dexidp.io/docs/connectors/openshift/
 - target:
     kind: ServiceAccount

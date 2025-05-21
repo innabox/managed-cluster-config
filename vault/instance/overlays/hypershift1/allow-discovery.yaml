@@ -1,5 +1,5 @@
 # Allow anonymous access to oidc discovery urls:
-# 
+#
 # - /.well-known/openid-configuration
 # - /openid/v1/jwks
 #

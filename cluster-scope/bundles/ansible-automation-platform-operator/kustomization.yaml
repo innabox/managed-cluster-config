@@ -4,5 +4,5 @@ commonLabels:
   nerc.mghpcc.org/bundle: ansible-automation-platform-operator
 resources:
 - ../../base/core/namespaces/aap
-- ../../base/operators.coreos.com/operatorgroups/aap
+- ../../base/operators.coreos.com/operatorgroups/ansible-automation-platform-operator
 - ../../base/operators.coreos.com/subscriptions/ansible-automation-platform-operator
