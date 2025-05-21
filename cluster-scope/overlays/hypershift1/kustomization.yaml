@@ -130,7 +130,7 @@ patches:
   patch: |
     - op: replace
       path: /spec/channel
-      value: gitops-1.15
+      value: gitops-1.16
 - target:
     kind: Subscription
     name: ansible-automation-platform-operator
