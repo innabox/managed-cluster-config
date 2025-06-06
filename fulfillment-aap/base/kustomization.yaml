@@ -5,3 +5,5 @@ resources:
 - role-create-controller-token.yaml
 - rolebinding-aap-fulfillment-template-publisher.yaml
 - serviceaccount-template-publisher.yaml
+- serviceaccount-cloudkit-sa.yaml
+- clusterrolebinding-admin-cloudkit-sa.yaml
